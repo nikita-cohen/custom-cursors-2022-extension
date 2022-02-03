@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../css/PopUp.css">
+</head>
+<body>
+<div class="main-container">
+   <div id="welcome-pop-up" class="welcome-pop-up">
+       <div class="welcome-main-container">
+           <div class="welcome-action-bar">
+               <div class="welcome-inner-action-bar">
+                   <div id="welcome-logo" class="welcome-logo">
+                       <img class="logo-img" src="../asset/icon.svg" alt="icon"/>
+                       <div class="welcome-logo-txt">
+                           Custom Cursors
+                       </div>
+                   </div>
+                   <div id="welcome-how-to-use-container" class="welcome-how-to-use-container">
+                       <div class="welcome-how-to-use-txt">
+                           How to use
+                       </div>
+                       <img class="Q-img-welcome" src="../asset/Q-icon.svg" alt="Q">
+                   </div>
+               </div>
+           </div>
+           <div class="inner-content-container-welcome">
+               <div class="header-welcome">
+                   Top cursors
+               </div>
+               <div class="description-welcome">
+                   Hover to cursor icon to try or add cursor
+               </div>
+               <div id="cursor-container-welcome" class="cursor-container-welcome"></div>
+               <div id="button-get-more-welcome" class="button-get-more-welcome">
+                   <div class="button-get-more-txt">
+                       Get More Cursors
+                   </div>
+               </div>
+               <div id="go-to-collection-button" class="go-to-collection-button">
+                   <div id="more-cursors-btn-welcome" class="more-cursors-btn-welcome">
+                       <div class="more-cursors-btn-welcome-txt">
+                           Get More Cursors
+                       </div>
+                   </div>
+                   <div id="button-go-to-collection" class="button-go-to-collection">
+                       <div class="button-go-to-collection-txt">
+                           Go to Your Collection
+                       </div>
+                   </div>
+
+               </div>
+           </div>
+       </div>
+   </div>
+    <div id="user-collection-pop-up" class="user-collection-pop-up">
+        <div class="user-collection-main-container">
+            <div id="extension-off" class="extension-off"></div>
+            <div id="delete-cursor" class="delete-cursor">
+                <div class="delete-pop-up">
+                    <div class="cube-delete-pop-up">
+                        <img id="delete-img" class="delete-image" src="../asset/bigpony.svg" alt="cursor"/>
+                    </div>
+                    <div class="txt-delete-popup">
+                        Are you sure you want to delete the cursor?
+                    </div>
+                    <div id="button-yes" class="button-yes">
+                        <div class="yes-txt">Yes</div>
+                    </div>
+                    <div id="button-no" class="button-yes">
+                        <div class="yes-txt">No</div>
+                    </div>
+                </div>
+            </div>
+            <div class="user-pop-up-action-bar">
+                <div class="user-inner-action-bar">
+                    <div id="welcome-logo-user" class="welcome-logo">
+                        <img class="logo-img" src="../asset/icon.svg" alt="icon"/>
+                        <div class="welcome-logo-txt">
+                            Custom Cursors
+                        </div>
+                    </div>
+                    <div id="buttons-user-collection-popup" class="buttons-user-collection-popup">
+                        <div class="buttons">
+                            <div id="resize-button" class="resize-button">
+                                <img class="resize-img" src="../asset/cursor-size-icon.svg" alt="size"/>
+                                <div class="resize-txt">
+                                    Cursor Size
+                                </div>
+                            </div>
+                            <div id="how-to-use-button" class="how-to-use-button">
+                                <img class="Q-img-welcome" src="../asset/Q-icon.svg" alt="Q">
+                                <div class="how-to-use-txt">
+                                    How to use
+                                </div>
+                            </div>
+                            <label class="switch">
+                                <input  type="checkbox" id="togBtn">
+                                <span class="slider round">
+                                    <!--ADDED HTML -->
+                                    <span class="on">ON</span>
+                                    <span class="off">OFF</span>
+                                    <!--END-->
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                    <div id="size-dot-container" class="size-dot-container">
+                        <ul class="progressbar">
+                            <li id="one"  class="dot"></li>
+                            <li id="two" class="dot"></li>
+                            <li id="three" class="dot"></li>
+                            <li id="four" class="dot"></li>
+                            <li id="five" class="dot"></li>
+                            <li id="six" class="dot"></li>
+                        </ul>
+                        <img id="x-for-resize" class="x-for-resize" src="../asset/x-for-resize.svg" alt="x"/>
+                    </div>
+                    <div id="size-dot-container-off" class="size-dot-container-off">
+                        <div>
+                            <div class="progressbar-off-txt-container">
+                                <div class="progressbar-off-txt">Select the cursor to resize it</div>
+                            </div>
+                            <ul class="progressbar-off">
+                                <li id="one-o" class="dot-o"></li>
+                                <li id="two-o" class="dot-o"></li>
+                                <li id="three-o" class="dot-o"></li>
+                                <li id="four-o" class="dot-o"></li>
+                                <li id="five-o" class="dot-o"></li>
+                                <li id="six-o" class="dot-o"></li>
+                            </ul>
+                        </div>
+                        <img id="x-for-resize-off" class="x-for-resize-off" src="../asset/x-for-resize.svg" alt="x"/>
+                    </div>
+                </div>
+            </div>
+            <div class="main-container-content">
+                <div class="inner-content-container">
+                    <div class="collection-txt-header">
+                        Your Collection
+                    </div>
+                    <div id="cursor-container" class="cursor-container"></div>
+                    <div class="collection-top-cursor-header">
+                        Top cursors
+                    </div>
+                    <div id="top-cursor-container" class="top-cursor-container"></div>
+                </div>
+                <div class="button-get-more-container">
+                    <div id="button-get-more" class="button-get-more">
+                        <div class="get-more-txt">
+                            Get More Cursors
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+   <script type="text/javascript" src="../js/PopUp.js"></script>
+</body>
+</html>
