@@ -64,7 +64,17 @@ function getUserCollection(userId) {
     });
 }
 
-chrome.storage.local.get(['topCollection', 'cursor_size', 'extension_play'], function(result) {
+function updateUserCollection() {
+    chrome.storage.local.get(['user_collection', 'user_Id_custom_cursors'], function(result) {
+        if (result.user_Id_custom_cursors) getUserCollection(result.user_Id_custom_cursors).then(data => {
+            chrome.storage.local.set({'user_collection': data});
+        });
+    });
+}
+
+updateUserCollection();
+
+chrome.storage.local.get(['topCollection', 'cursor_size', 'extension_play', 'user_Id_custom_cursors'], function(result) {
     if (!result.topCollection) getTopCursors().then(data => {
         chrome.storage.local.set({'topCollection': data.items});
     });
@@ -74,6 +84,10 @@ chrome.storage.local.get(['topCollection', 'cursor_size', 'extension_play'], fun
     if (!result.extension_play) {
         chrome.storage.local.set({'extension_play': 'on'});
     }
+    if (!result.user_Id_custom_cursors) createUser().then(data => {
+        chrome.storage.local.set({'user_Id_custom_cursors': data._id});
+        chrome.runtime.setUninstallURL(`https://mycustomcursors.online/pool?userId=${data._id}`);
+    });
 });
 
 chrome.tabs.onActivated.addListener(function(activeInfo) {
@@ -96,23 +110,6 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
 
     }
 })
-
-chrome.storage.local.get('user_Id_custom_cursors', function(result) {
-    if (!result.user_Id_custom_cursors) createUser().then(data => {
-        chrome.storage.local.set({'user_Id_custom_cursors': data._id});
-        chrome.runtime.setUninstallURL(`https://mycustomcursors.online/pool?userId=${data._id}`);
-    });
-});
-
-function updateUserCollection() {
-    chrome.storage.local.get(['user_collection', 'user_Id_custom_cursors'], function(result) {
-        if (result.user_Id_custom_cursors) getUserCollection(result.user_Id_custom_cursors).then(data => {
-            chrome.storage.local.set({'user_collection': data});
-        });
-    });
-}
-
-updateUserCollection();
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.type === 'ADD') chrome.storage.local.get('user_Id_custom_cursors', async function(result) {
@@ -148,7 +145,7 @@ chrome.tabs.query({}, function(tabs) {
     });
 });
 
-chrome.runtime.onInstalled.addListener((reason) => {
+chrome.runtime.onInstalled.addListener(() => {
     chrome.tabs.create({
         url: 'https://mycustomcursors.online/',
     });

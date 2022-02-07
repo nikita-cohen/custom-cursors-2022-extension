@@ -1,55 +1,78 @@
 const cursorContainerWelcomePopUp = document.getElementById("cursor-container-welcome")
 const topCursorContainerUserPopUp = document.getElementById('top-cursor-container')
+const togBtn = document.getElementById('togBtn');
+const extensionOff = document.getElementById('extension-off');
+const extensionNotWorking = document.getElementById('extension-not-working');
+const extensionNotWorkingWelcome = document.getElementById('extension-not-working-welcome');
+const userCollectionPopUp = document.getElementById("user-collection-pop-up");
+const welcomePopUp = document.getElementById("welcome-pop-up");
+const buttonsUserCollectionPopUp =  document.getElementById('buttons-user-collection-popup');
+const sizeDotContainerOff = document.getElementById('size-dot-container-off');
+const sizeDotContainer = document.getElementById('size-dot-container');
 let userCollection = []
 
-chrome.storage.local.get("user_collection", function (result) {
+chrome.storage.local.get(["cursor_size", "topCollection", "user_collection", "extension_play", "isExtensionWorking", "obj_cursor_url"], function (result) {
     userCollection = result.user_collection;
     if (result.user_collection !== undefined && Array.isArray(result.user_collection) && result.user_collection.length > 0) {
-        document.getElementById("user-collection-pop-up").style.display = "flex";
-        document.getElementById("welcome-pop-up").style.display = "none";
+       userCollectionPopUp.style.display = "flex";
+        welcomePopUp.style.display = "none";
     } else {
-        document.getElementById("user-collection-pop-up").style.display = "none";
-        document.getElementById("welcome-pop-up").style.display = "flex";
+        userCollectionPopUp.style.display = "none";
+        welcomePopUp.style.display = "flex";
 
     }
-});
-
-chrome.storage.local.get(["cursor_size"], function (result) {
     document.getElementById(result.cursor_size).classList.add('active');
     document.getElementById(result.cursor_size + "-o").classList.add('active-off');
-})
 
-chrome.storage.local.get("extension_play", function (result) {
     if (result.extension_play === "on") {
-        document.getElementById('togBtn').checked = true;
+        togBtn.checked = true;
     } else if (result.extension_play === "off") {
-        document.getElementById('togBtn').checked = false;
-        document.getElementById('extension-off').style.display = 'block';
+        togBtn.checked = false;
+        extensionOff.style.display = 'block';
     }
-})
 
-chrome.storage.local.get(["isExtensionWorking", "user_collection"], function (result) {
     if (result.user_collection !== undefined && Array.isArray(result.user_collection) && result.user_collection.length > 0) {
         if (result.isExtensionWorking === false) {
-            document.getElementById('extension-not-working').style.display = "flex";
+            extensionNotWorking.style.display = "flex";
         }
     } else {
         if (result.isExtensionWorking === false) {
-            document.getElementById('extension-not-working-welcome').style.display = "flex";
+            extensionNotWorkingWelcome.style.display = "flex";
         }
     }
+
+    result.topCollection.forEach((item, index) => {
+        if (index <= 27) {
+            drawTopCursorsInWelcomePopUp(item, index, cursorContainerWelcomePopUp, "welcome")
+            if (result.user_collection !== undefined && Array.isArray(result.user_collection) && result.user_collection.length > 0){
+                drawTopCursorsInWelcomePopUp(item, index, topCursorContainerUserPopUp, "user", userCollection)
+            }
+        }
+    })
+
+    if (result.user_collection){
+        result.user_collection.forEach((item, index) => {
+            drawUserCursors(item)
+        })
+    }
+
+    if (result.obj_cursor_url && result.extension_play === 'on') {
+        changeCursor(result.obj_cursor_url.urlCursor)
+        changePointer(result.obj_cursor_url.urlPointer)
+    }
+
 })
 
 function setOnClickListener() {
-    document.getElementById('button-get-more-welcome').addEventListener('click', (event) => {
+    document.getElementById('button-get-more-welcome').addEventListener('click', () => {
         window.open("https://mycustomcursors.online/cursor-collection", '_blank').focus();
     })
 
-    document.getElementById('more-cursors-btn-welcome').addEventListener('click', (event) => {
+    document.getElementById('more-cursors-btn-welcome').addEventListener('click', () => {
         window.open("https://mycustomcursors.online/cursor-collection", '_blank').focus();
     })
 
-    document.getElementById('button-go-to-collection').addEventListener('click', (event) => {
+    document.getElementById('button-go-to-collection').addEventListener('click', () => {
         chrome.storage.local.get(["user_collection", "topCollection", "isExtensionWorking"], function (result) {
             result.topCollection.forEach((item, index) => {
                 if (index <= 27) {
@@ -61,63 +84,63 @@ function setOnClickListener() {
                     drawUserCursors(item)
                 })
                 if (result.isExtensionWorking === false) {
-                    document.getElementById('extension-not-working').style.display = "flex";
-                    document.getElementById('extension-not-working-welcome').style.display = "none";
+                    extensionNotWorking.style.display = "flex";
+                    extensionNotWorkingWelcome.style.display = "none";
                 }
-                document.getElementById("user-collection-pop-up").style.display = "flex";
-                document.getElementById("welcome-pop-up").style.display = "none";
+                userCollectionPopUp.style.display = "flex";
+                welcomePopUp.style.display = "none";
             }
         })
     })
 
-    document.getElementById('resize-button').addEventListener('click', (event) => {
+    document.getElementById('resize-button').addEventListener('click', () => {
         chrome.storage.local.get("obj_cursor_url", function (result) {
             if (!result.obj_cursor_url || result.obj_cursor_url === "") {
-                document.getElementById('buttons-user-collection-popup').style.display = "none";
-                document.getElementById('size-dot-container-off').style.display = "flex";
+                buttonsUserCollectionPopUp.style.display = "none";
+                sizeDotContainerOff.style.display = "flex";
             } else {
-                document.getElementById('buttons-user-collection-popup').style.display = "none";
-                document.getElementById('size-dot-container').style.display = "flex";
+                buttonsUserCollectionPopUp.style.display = "none";
+                sizeDotContainer.style.display = "flex";
             }
         });
 
     })
 
-    document.getElementById('x-for-resize').addEventListener('click', (event) => {
-        document.getElementById('size-dot-container').style.display = "none";
-        document.getElementById('buttons-user-collection-popup').style.display = "flex";
+    document.getElementById('x-for-resize').addEventListener('click', () => {
+        sizeDotContainer.style.display = "none";
+        buttonsUserCollectionPopUp.style.display = "flex";
     })
 
-    document.getElementById('x-for-resize-off').addEventListener('click', (event) => {
-        document.getElementById('size-dot-container-off').style.display = "none";
-        document.getElementById('buttons-user-collection-popup').style.display = "flex";
+    document.getElementById('x-for-resize-off').addEventListener('click', () => {
+        sizeDotContainerOff.style.display = "none";
+        buttonsUserCollectionPopUp.style.display = "flex";
     })
 
-    document.getElementById('welcome-logo').addEventListener('click', (event) => {
+    document.getElementById('welcome-logo').addEventListener('click', () => {
         window.open("https://mycustomcursors.online/cursor-collection", '_blank').focus();
     })
 
-    document.getElementById('welcome-how-to-use-container').addEventListener('click', (event) => {
+    document.getElementById('welcome-how-to-use-container').addEventListener('click', () => {
         window.open("https://mycustomcursors.online/how-to-use", '_blank').focus();
     })
 
-    document.getElementById('button-get-more').addEventListener('click', (event) => {
+    document.getElementById('button-get-more').addEventListener('click', () => {
         window.open("https://mycustomcursors.online/cursor-collection", '_blank').focus();
     })
 
-    document.getElementById('welcome-logo-user').addEventListener('click', (event) => {
+    document.getElementById('welcome-logo-user').addEventListener('click', () => {
         window.open("https://mycustomcursors.online/cursor-collection", '_blank').focus();
     })
 
-    document.getElementById('how-to-use-button').addEventListener('click', (event) => {
+    document.getElementById('how-to-use-button').addEventListener('click', () => {
         window.open("https://mycustomcursors.online/how-to-use", '_blank').focus();
     })
 
-    document.getElementById('togBtn').addEventListener('change', (event) => {
+    document.getElementById('togBtn').addEventListener('change', () => {
         chrome.storage.local.get(["extension_play", "obj_cursor_url", "default_url"],async function (result) {
             if (result.extension_play === "on") {
                 chrome.storage.local.set({"extension_play" : "off"})
-                document.getElementById('extension-off').style.display = 'block';
+                extensionOff.style.display = 'block';
                 disablePointer()
                 disableCursor()
                 chrome.storage.local.set({"turn_off" : "off"})
@@ -127,7 +150,7 @@ function setOnClickListener() {
                 chrome.storage.local.set({"obj_cursor_url" : result.obj_cursor_url})
                 changeCursor(result.obj_cursor_url.urlCursor)
                 changePointer(result.obj_cursor_url.urlPointer)
-                document.getElementById('extension-off').style.display = 'none';
+                extensionOff.style.display = 'none';
                 chrome.storage.local.set({"turn_off" : "on"})
             }
         })
@@ -472,17 +495,6 @@ function bindingDataToClickListener(item, element) {
     drawUserCursors(item)
 }
 
-chrome.storage.local.get(["topCollection", "user_collection"], function (result) {
-    result.topCollection.forEach((item, index) => {
-        if (index <= 27) {
-            drawTopCursorsInWelcomePopUp(item, index, cursorContainerWelcomePopUp, "welcome")
-            if (result.user_collection !== undefined && Array.isArray(result.user_collection) && result.user_collection.length > 0){
-                drawTopCursorsInWelcomePopUp(item, index, topCursorContainerUserPopUp, "user", userCollection)
-            }
-        }
-    })
-})
-
 function drawUserCursors(item) {
     const container  = document.getElementById("cursor-container");
     const cube = document.createElement('div');
@@ -503,12 +515,12 @@ function drawUserCursors(item) {
 
     cube.addEventListener('click', async (event) => {
         const resizedUrl = await getResizedUrl(cursorUrl, pointerUrl);
-        const resizeView = document.getElementById("size-dot-container-off");
+        const resizeView = sizeDotContainerOff;
         chrome.storage.local.set({"obj_cursor_url" : resizedUrl})
         chrome.storage.local.set({"default_url" : {"urlCursor" : cursorUrl, "urlPointer" : pointerUrl}})
         if (resizeView.style.display === "flex") {
             resizeView.style.display = "none";
-            document.getElementById("size-dot-container").style.display = "flex";
+            sizeDotContainer.style.display = "flex";
         }
         disableTrying();
         changeCursor(resizedUrl.urlCursor)
@@ -523,7 +535,7 @@ function drawUserCursors(item) {
         const buttonYes = document.getElementById('button-yes');
         const clone = buttonYes.cloneNode(true);
 
-        clone.addEventListener('click' , event => {
+        clone.addEventListener('click' , () => {
             chrome.runtime.sendMessage({type: "DELETE", cursorId: item.id}, async function (response) {
                 if (response === "ok") {
                     const topCubeArray = document.getElementsByClassName("cube-container-inner-welcome");
@@ -562,18 +574,3 @@ function drawUserCursors(item) {
 
     container.appendChild(cube)
 }
-
-chrome.storage.local.get("user_collection", function (result) {
-    if (result.user_collection){
-        result.user_collection.forEach((item, index) => {
-            drawUserCursors(item)
-        })
-    }
-})
-
-chrome.storage.local.get(["obj_cursor_url", 'extension_play'], function (result) {
-    if (result.obj_cursor_url && result.extension_play === 'on') {
-        changeCursor(result.obj_cursor_url.urlCursor)
-        changePointer(result.obj_cursor_url.urlPointer)
-    }
-});

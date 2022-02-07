@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "manifest_version": 3,
   "icons":
-  { "16": "./asset/icon16.svg",
-    "24": "./asset/icon24.svg",
-    "32": "./asset/icon32.svg",
-    "48": "./asset/icon48.svg",
-    "128" : "./asset/icon128.svg"
+  { "16": "asset/icon_16.png",
+    "24": "asset/icon_24.png",
+    "32": "asset/icon_32.png",
+    "48": "asset/icon_48.png",
+    "128" : "asset/icon_128.png"
   },
   "action": {
-    "default_icon" :{"32": "./asset/icon32.svg "},
+    "default_icon" : "asset/icon_32.png",
     "default_popup": "./html/PopUp.html"
   },
   "background": {
