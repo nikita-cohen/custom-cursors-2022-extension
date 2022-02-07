@@ -3,7 +3,6 @@ const topCursorContainerUserPopUp = document.getElementById('top-cursor-containe
 let userCollection = []
 
 chrome.storage.local.get("user_collection", function (result) {
-    console.log(result.user_collection)
     userCollection = result.user_collection;
     if (result.user_collection !== undefined && Array.isArray(result.user_collection) && result.user_collection.length > 0) {
         document.getElementById("user-collection-pop-up").style.display = "flex";
@@ -29,6 +28,18 @@ chrome.storage.local.get("extension_play", function (result) {
     }
 })
 
+chrome.storage.local.get(["isExtensionWorking", "user_collection"], function (result) {
+    if (result.user_collection !== undefined && Array.isArray(result.user_collection) && result.user_collection.length > 0) {
+        if (result.isExtensionWorking === false) {
+            document.getElementById('extension-not-working').style.display = "flex";
+        }
+    } else {
+        if (result.isExtensionWorking === false) {
+            document.getElementById('extension-not-working-welcome').style.display = "flex";
+        }
+    }
+})
+
 function setOnClickListener() {
     document.getElementById('button-get-more-welcome').addEventListener('click', (event) => {
         window.open("https://mycustomcursors.online/cursor-collection", '_blank').focus();
@@ -39,7 +50,7 @@ function setOnClickListener() {
     })
 
     document.getElementById('button-go-to-collection').addEventListener('click', (event) => {
-        chrome.storage.local.get(["user_collection", "topCollection"], function (result) {
+        chrome.storage.local.get(["user_collection", "topCollection", "isExtensionWorking"], function (result) {
             result.topCollection.forEach((item, index) => {
                 if (index <= 27) {
                     drawTopCursorsInWelcomePopUp(item, index, topCursorContainerUserPopUp, "user" , result.user_collection)
@@ -49,6 +60,10 @@ function setOnClickListener() {
                 result.user_collection.forEach((item) => {
                     drawUserCursors(item)
                 })
+                if (result.isExtensionWorking === false) {
+                    document.getElementById('extension-not-working').style.display = "flex";
+                    document.getElementById('extension-not-working-welcome').style.display = "none";
+                }
                 document.getElementById("user-collection-pop-up").style.display = "flex";
                 document.getElementById("welcome-pop-up").style.display = "none";
             }
@@ -99,17 +114,21 @@ function setOnClickListener() {
     })
 
     document.getElementById('togBtn').addEventListener('change', (event) => {
-        chrome.storage.local.get("extension_play", function (result) {
+        chrome.storage.local.get(["extension_play", "obj_cursor_url", "default_url"],async function (result) {
             if (result.extension_play === "on") {
                 chrome.storage.local.set({"extension_play" : "off"})
-                chrome.storage.local.set({"default_url" : ""})
                 document.getElementById('extension-off').style.display = 'block';
                 disablePointer()
                 disableCursor()
-                chrome.storage.local.set({"obj_cursor_url" : ""})
+                chrome.storage.local.set({"turn_off" : "off"})
             } else if (result.extension_play === "off") {
                 chrome.storage.local.set({"extension_play" : "on"})
+                chrome.storage.local.set({"obj_cursor_url" : ""})
+                chrome.storage.local.set({"obj_cursor_url" : result.obj_cursor_url})
+                changeCursor(result.obj_cursor_url.urlCursor)
+                changePointer(result.obj_cursor_url.urlPointer)
                 document.getElementById('extension-off').style.display = 'none';
+                chrome.storage.local.set({"turn_off" : "on"})
             }
         })
 
@@ -273,7 +292,6 @@ function checkCursorSize() {
 function getResizedUrl(cursorUrl, pointerUrl) {
     return new Promise(async (resolve, reject) => {
         const sizeObj = await checkCursorSize();
-        console.log(sizeObj)
         const dataResizedCursor = await resizeDataURL(cursorUrl, sizeObj.width, sizeObj.height, "cursor");
         const dataResizedPointer = await resizeDataURL(pointerUrl, sizeObj.width, sizeObj.height, "cursor");
         const newObj = {
@@ -553,8 +571,8 @@ chrome.storage.local.get("user_collection", function (result) {
     }
 })
 
-chrome.storage.local.get("obj_cursor_url", function (result) {
-    if (result.obj_cursor_url !== null) {
+chrome.storage.local.get(["obj_cursor_url", 'extension_play'], function (result) {
+    if (result.obj_cursor_url && result.extension_play === 'on') {
         changeCursor(result.obj_cursor_url.urlCursor)
         changePointer(result.obj_cursor_url.urlPointer)
     }

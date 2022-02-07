@@ -64,21 +64,43 @@ function getUserCollection(userId) {
     });
 }
 
-chrome.storage.local.get('topCollection', function(result) {
+chrome.storage.local.get(['topCollection', 'cursor_size', 'extension_play'], function(result) {
     if (!result.topCollection) getTopCursors().then(data => {
         chrome.storage.local.set({'topCollection': data.items});
     });
+    if (!result.cursor_size) {
+        chrome.storage.local.set({'cursor_size': 'three'});
+    }
+    if (!result.extension_play) {
+        chrome.storage.local.set({'extension_play': 'on'});
+    }
 });
 
-chrome.storage.local.set({'obj_cursor_url': null});
-chrome.storage.local.set({'cursor_size': 'three'});
-chrome.storage.local.set({'default_url': null});
-chrome.storage.local.set({'extension_play': 'on'});
+chrome.tabs.onActivated.addListener(function(activeInfo) {
+    chrome.tabs.get(activeInfo.tabId, function(tab){
+        if (tab.url.startsWith("chrome://") || tab.url.startsWith('https://chrome.google') || tab.url.startsWith("chrome://newtab")){
+            chrome.storage.local.set({'isExtensionWorking': false});
+        } else {
+            chrome.storage.local.set({'isExtensionWorking': true});
+        }
+    });
+});
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
+    if (changeInfo.url){
+        if (changeInfo.url.startsWith("chrome://") || changeInfo.url.startsWith('https://chrome.google') || changeInfo.url.startsWith("chrome://newtab")){
+            chrome.storage.local.set({'isExtensionWorking': false});
+        } else {
+            chrome.storage.local.set({'isExtensionWorking': true});
+        }
+
+    }
+})
 
 chrome.storage.local.get('user_Id_custom_cursors', function(result) {
     if (!result.user_Id_custom_cursors) createUser().then(data => {
         chrome.storage.local.set({'user_Id_custom_cursors': data._id});
-        chrome.runtime.setUninstallURL(`http://localhost:3000/pool?userId=${data._id}`);
+        chrome.runtime.setUninstallURL(`https://mycustomcursors.online/pool?userId=${data._id}`);
     });
 });
 
@@ -119,16 +141,15 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
 chrome.tabs.query({}, function(tabs) {
     tabs.forEach(tb => {
-        console.log(tb);
-        if (!tb.url.startsWith('chrome://')) chrome.scripting.executeScript({target: {tabId: tb.id, allFrames: false}, files: ['js/ContentScript.js']});
+        const isMatch = !(tb.url.match("https://chrome.google.com") || tb.url.match('chrome://')|| tb.url.match("chrome-error://chromewebdata/") || tb.url.match("error://chromewebdata/") || tb.url.match("view-source:") || tb.url.match("file:///") || !tb.url.match("http://") && !tb.url.match("https://"))
+        if (isMatch) {
+            chrome.scripting.executeScript({target: {tabId: tb.id, allFrames: false}, files: ['js/ContentScript.js']});
+        }
     });
 });
-
 
 chrome.runtime.onInstalled.addListener((reason) => {
     chrome.tabs.create({
         url: 'https://mycustomcursors.online/',
     });
 });
-
-

@@ -2,7 +2,15 @@
   "name": "Custom Cursors 2022",
   "version": "1.0.0",
   "manifest_version": 3,
+  "icons":
+  { "16": "./asset/icon16.svg",
+    "24": "./asset/icon24.svg",
+    "32": "./asset/icon32.svg",
+    "48": "./asset/icon48.svg",
+    "128" : "./asset/icon128.svg"
+  },
   "action": {
+    "default_icon" :{"32": "./asset/icon32.svg "},
     "default_popup": "./html/PopUp.html"
   },
   "background": {
