@@ -894,13 +894,13 @@ input:checked + .slider .off
 .cursor-container {
     margin-top: 10px;
     width: 100%;
-    display: grid;
-    grid-template-columns: repeat(auto-fit , minmax(70px, 1fr));
-    grid-gap: 7px;
-    justify-content: space-between;
+    display: flex;
     box-sizing: border-box;
-
+    flex-wrap: wrap;
 }
+
+.cursor-container > :nth-child(5n+1) { margin-left: 0; }
+.cursor-container > :first-child { margin-left: 0; }
 
 .cube {
     height: 70px;
@@ -911,6 +911,8 @@ input:checked + .slider .off
     justify-content: center;
     align-items: center;
     position: relative;
+    margin-left: 8px;
+    margin-top: 8px;
 }
 
 .x-image {
