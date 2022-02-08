@@ -14,35 +14,16 @@ function getStyle(element, property) {
     return (getComputedStyle(element, null).getPropertyValue(property));
 }
 
-function changePointer(url) {
+
+function changeCursor(urlCursor, urlPointer) {
     let styleSheet = document.createElement('style');
 
     styleSheet.type = 'text/css';
     styleSheet.rel = 'stylesheet';
 
-    styleSheet.innerHTML = `a,  button, .pointer-hover {\n  cursor: url('${url}') 0 0, pointer !important;\n        }\n `;
+    styleSheet.innerHTML = `.cursor-hover {\n  cursor: url('${urlCursor}') 0 0, default !important;\n        }\n 
+     a,  button, .pointer-hover {\n  cursor: url('${urlPointer}') 0 0, pointer !important;\n        }\n`;
 
-    document.head.appendChild(styleSheet);
-}
-
-function changeCursor(url) {
-    let styleSheet = document.createElement('style');
-
-    styleSheet.type = 'text/css';
-    styleSheet.rel = 'stylesheet';
-
-    styleSheet.innerHTML = `.cursor-hover {\n  cursor: url('${url}') 0 0, default !important;\n        }\n `;
-
-    document.head.appendChild(styleSheet);
-}
-
-function disablePointer() {
-    let styleSheet = document.createElement('style');
-
-    styleSheet.type = 'text/css';
-    styleSheet.rel = 'stylesheet';
-
-    styleSheet.innerHTML = `a, button, .pointer-hover {\n  cursor: pointer !important;\n        }\n `;
     document.head.appendChild(styleSheet);
 }
 
@@ -52,7 +33,8 @@ function disableCursor() {
     styleSheet.type = 'text/css';
     styleSheet.rel = 'stylesheet';
 
-    styleSheet.innerHTML = `a, button, .cursor-hover {\n  cursor: default !important;\n        }\n `;
+    styleSheet.innerHTML = `a, button, .cursor-hover {\n  cursor: default !important;\n        }\n 
+    a, button, .pointer-hover {\n  cursor: pointer !important;\n        }\n `;
     document.head.appendChild(styleSheet);
 }
 
@@ -69,18 +51,15 @@ document.body.addEventListener('mouseover', event => {
 chrome.storage.onChanged.addListener(function (changes, namespace) {
     for (let [key, {oldValue, newValue}] of Object.entries(changes)) {
         if (key === "obj_cursor_url") {
-            changeCursor(newValue.urlCursor)
-            changePointer(newValue.urlPointer)
+            changeCursor(newValue.urlCursor, newValue.urlPointer)
         }
         if (key === "turn_off" && newValue === "off") {
             disableCursor()
-            disablePointer()
         }
     }
 })
 
 chrome.storage.local.get("obj_cursor_url", function (result) {
     console.log(result.obj_cursor_url)
-        changeCursor(result.obj_cursor_url.urlCursor)
-        changePointer(result.obj_cursor_url.urlPointer)
+        changeCursor(result.obj_cursor_url.urlCursor, result.obj_cursor_url.urlPointer)
 });

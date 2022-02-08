@@ -9,6 +9,7 @@ const welcomePopUp = document.getElementById("welcome-pop-up");
 const buttonsUserCollectionPopUp =  document.getElementById('buttons-user-collection-popup');
 const sizeDotContainerOff = document.getElementById('size-dot-container-off');
 const sizeDotContainer = document.getElementById('size-dot-container');
+const tryButtonsWelcome = document.querySelectorAll('.try-button-welcome')
 let userCollection = []
 
 chrome.storage.local.get(["cursor_size", "topCollection", "user_collection", "extension_play", "isExtensionWorking", "obj_cursor_url"], function (result) {
@@ -57,8 +58,7 @@ chrome.storage.local.get(["cursor_size", "topCollection", "user_collection", "ex
     }
 
     if (result.obj_cursor_url && result.extension_play === 'on') {
-        changeCursor(result.obj_cursor_url.urlCursor)
-        changePointer(result.obj_cursor_url.urlPointer)
+        changeCursor(result.obj_cursor_url.urlCursor, result.obj_cursor_url.urlPointer)
     }
 
 })
@@ -141,15 +141,14 @@ function setOnClickListener() {
             if (result.extension_play === "on") {
                 chrome.storage.local.set({"extension_play" : "off"})
                 extensionOff.style.display = 'block';
-                disablePointer()
                 disableCursor()
                 chrome.storage.local.set({"turn_off" : "off"})
             } else if (result.extension_play === "off") {
-                chrome.storage.local.set({"extension_play" : "on"})
-                chrome.storage.local.set({"obj_cursor_url" : ""})
+                chrome.storage.local.set({"extension_play" : "on",
+                                          "obj_cursor_url" : ""
+                })
                 chrome.storage.local.set({"obj_cursor_url" : result.obj_cursor_url})
-                changeCursor(result.obj_cursor_url.urlCursor)
-                changePointer(result.obj_cursor_url.urlPointer)
+                changeCursor(result.obj_cursor_url.urlCursor, result.obj_cursor_url.urlPointer)
                 extensionOff.style.display = 'none';
                 chrome.storage.local.set({"turn_off" : "on"})
             }
@@ -164,35 +163,15 @@ function getStyle(element, property) {
     return (getComputedStyle(element, null).getPropertyValue(property));
 }
 
-function changePointer(url) {
+function changeCursor(urlCursor, urlPointer) {
     let styleSheet = document.createElement('style');
 
     styleSheet.type = 'text/css';
     styleSheet.rel = 'stylesheet';
 
-    styleSheet.innerHTML = `a,  button, .pointer-hover {\n  cursor: url('${url}') 0 0, pointer !important;\n        }\n `;
+    styleSheet.innerHTML = `.cursor-hover {\n  cursor: url('${urlCursor}') 0 0, default !important;\n        }\n 
+     a,  button, .pointer-hover {\n  cursor: url('${urlPointer}') 0 0, pointer !important;\n        }\n`;
 
-    document.head.appendChild(styleSheet);
-}
-
-function changeCursor(url) {
-    let styleSheet = document.createElement('style');
-
-    styleSheet.type = 'text/css';
-    styleSheet.rel = 'stylesheet';
-
-    styleSheet.innerHTML = `.cursor-hover {\n  cursor: url('${url}') 0 0, default !important;\n        }\n `;
-
-    document.head.appendChild(styleSheet);
-}
-
-function disablePointer() {
-    let styleSheet = document.createElement('style');
-
-    styleSheet.type = 'text/css';
-    styleSheet.rel = 'stylesheet';
-
-    styleSheet.innerHTML = `a, button, .pointer-hover {\n  cursor: pointer !important;\n        }\n `;
     document.head.appendChild(styleSheet);
 }
 
@@ -202,7 +181,8 @@ function disableCursor() {
     styleSheet.type = 'text/css';
     styleSheet.rel = 'stylesheet';
 
-    styleSheet.innerHTML = `a, button, .cursor-hover {\n  cursor: default !important;\n        }\n `;
+    styleSheet.innerHTML = `a, button, .cursor-hover {\n  cursor: default !important;\n        }\n 
+    a, button, .pointer-hover {\n  cursor: pointer !important;\n        }\n `;
     document.head.appendChild(styleSheet);
 }
 
@@ -238,26 +218,27 @@ function resizeCurrentCursor() {
     chrome.storage.local.get(["default_url"], async function (result) {
         if (result.default_url){
             const urls = await getResizedUrl(result.default_url.urlCursor, result.default_url.urlPointer);
-            changeCursor(urls.urlCursor)
-            changePointer(urls.urlPointer);
+            changeCursor(urls.urlCursor,urls.urlPointer)
             chrome.storage.local.set({"obj_cursor_url" : urls})
         }
     });
 }
 
+//dot-o class is the class of the dots' ui for change size when no cursor chosen
+// dot class is the class of the dots' ui for change size when cursor chosen
 function onClickForResize () {
     const dotArray = document.getElementsByClassName('dot');
     const dotOArray = document.getElementsByClassName('dot-o');
     Array.from(dotArray).forEach(dot => {
         dot.addEventListener("click", (event) => {
             if (!dot.classList.contains('active')){
-                Array.from(dotOArray).forEach(dotO => {
-                    if (dot.id + "-o" !== dotO.id) {
-                        if (dotO.classList.contains('active-off')){
-                            dotO.classList.remove('active-off')
+                Array.from(dotOArray).forEach(dotOffUiSize => {
+                    if (dot.id + "-o" !== dotOffUiSize.id) {
+                        if (dotOffUiSize.classList.contains('active-off')){
+                            dotOffUiSize.classList.remove('active-off')
                         }
                     } else {
-                        dotO.classList.add('active-off')
+                        dotOffUiSize.classList.add('active-off')
                     }
                 })
 
@@ -283,25 +264,31 @@ function checkCursorSize() {
         chrome.storage.local.get(["cursor_size"], function (result) {
             let width = "";
             let height = "";
-            console.log(result.cursor_size)
-            if (result.cursor_size === "one") {
+            switch (result.cursor_size) {
+            case "one" :
                 width = 16;
                 height = 16;
-            } else if (result.cursor_size === "two") {
+                break;
+            case "two" :
                 width = 22;
                 height = 22;
-            } else if (result.cursor_size === "three") {
+                break;
+            case "three":
                 width = 32;
                 height = 32;
-            }else if (result.cursor_size === "four") {
+                break;
+            case "four":
                 width = 38;
                 height = 38;
-            }else if (result.cursor_size === "five") {
+                break;
+            case "five":
                 width = 42;
                 height = 42;
-            }else if (result.cursor_size === "six") {
+                break;
+            case "six" :
                 width = 50;
                 height = 50;
+                break;
             }
             resolve({
                 "width" : width,
@@ -338,8 +325,7 @@ function changeTxtColorAndTextTryingButton(type, element) {
 }
 
 function disableTrying() {
-    const tryingButtons = document.querySelectorAll('.try-button-welcome')
-    tryingButtons.forEach(button => {
+    tryButtonsWelcome.forEach(button => {
         if (button.getAttribute('trying') === "true") {
                 button.setAttribute('trying', 'false');
                 button.style.backgroundColor = "#9F25FF";
@@ -351,8 +337,7 @@ function disableTrying() {
 }
 
 function checkIfAnotherButtonTrying(index) {
-    const tryingButtons = document.querySelectorAll('.try-button-welcome')
-    tryingButtons.forEach(button => {
+    tryButtonsWelcome.forEach(button => {
         if (button.id !== index.toString()) {
             if (button.getAttribute('trying') === "true") {
                 button.setAttribute('trying', 'false');
@@ -375,21 +360,18 @@ async function onClickTry(event, item, element, index) {
         mainElement.style.backgroundColor = "#F6FBFF";
 
         changeTxtColorAndTextTryingButton("trying", element)
-        changeCursor(url.urlCursor);
-        changePointer(url.urlPointer);
+        changeCursor(url.urlCursor, url.urlPointer);
         checkIfAnotherButtonTrying(index)
 
         mainElement.setAttribute('trying', 'true')
     } else if (mainElement.getAttribute("trying") === "true") {
         disableCursor()
-        disablePointer()
         mainElement.style.backgroundColor = "#9F25FF";
         changeTxtColorAndTextTryingButton("stop", element)
         mainElement.setAttribute('trying', 'false')
         chrome.storage.local.get("obj_cursor_url", function (result) {
             if (result.obj_cursor_url !== null) {
-                changeCursor(result.obj_cursor_url.urlCursor)
-                changePointer(result.obj_cursor_url.urlPointer)
+                changeCursor(result.obj_cursor_url.urlCursor,result.obj_cursor_url.urlPointer)
             }
         });
 
@@ -401,7 +383,6 @@ function addCursor(cursorId, element) {
         if (response === "ok") {
 
             const backgroundElement = element.querySelector('.add-button-welcome');
-            console.log(backgroundElement)
             backgroundElement.style.background = '#00D108';
             backgroundElement.querySelector('.image-add-welcome').src = '../asset/v-small.svg';
             element.querySelector('.v').style.display = 'flex';
@@ -412,42 +393,8 @@ function addCursor(cursorId, element) {
     });
 }
 
-function drawTopCursorsInWelcomePopUp(item, index, mainElement, type, collection) {
-
-    let display = "none";
-    let src = "../asset/ADD.svg";
-    let backgroundColor = "linear-gradient(269.42deg, #006EDD 0%, #004585 100%)";
-
-    if (type === "user") {
-        if (collection) {
-            collection.forEach(cursor => {
-                if (cursor.id === item.id) {
-                    display = "flex";
-                    src = "../asset/v-small.svg"
-                    backgroundColor = "#00D108"
-                }
-            })
-        }
-    } else {
-        if (userCollection) {
-            userCollection.forEach(cursor => {
-                if (cursor.id === item.id) {
-                    display = "flex";
-                    src = "../asset/v-small.svg"
-                    backgroundColor = "#00D108"
-                }
-            })
-        }
-    }
-
-
-    const cubeContainerInner = document.createElement('div');
-
-    cubeContainerInner.className = 'cube-container-inner-welcome';
-    cubeContainerInner.id = item.id;
-
-    cubeContainerInner.innerHTML =
-        `<div class="cube-welcome">
+function setInnerHtml(display, src , backgroundColor, index, item) {
+    return `<div class="cube-welcome">
                            <img class="img-cube-welcome" src="${item.cursor.newPath}" alt="pony"/>
                            <div class="v" style="display:${display}">
                               <img class="v-img" src="../asset/v.svg" alt="v" />
@@ -471,21 +418,59 @@ function drawTopCursorsInWelcomePopUp(item, index, mainElement, type, collection
                                </div>
                            </div>
                        </div>`
+}
+
+function checkTheStyleForTopCursorCube(type, collection, item) {
+    let display = "none";
+    let src = "../asset/ADD.svg";
+    let backgroundColor = "linear-gradient(269.42deg, #006EDD 0%, #004585 100%)";
+    if (type === "user") {
+        if (collection) {
+            collection.forEach(cursor => {
+                if (cursor.id === item.id) {
+                    display = "flex";
+                    src = "../asset/v-small.svg"
+                    backgroundColor = "#00D108"
+                }
+            })
+        }
+    } else {
+        if (userCollection) {
+            userCollection.forEach(cursor => {
+                if (cursor.id === item.id) {
+                    display = "flex";
+                    src = "../asset/v-small.svg"
+                    backgroundColor = "#00D108"
+                }
+            })
+        }
+    }
+    return {"display" : display, "src" : src, "backgroundColor" : backgroundColor}
+}
+
+function drawTopCursorsInWelcomePopUp(item, index, mainElement, type, collection) {
+
+    let styles = checkTheStyleForTopCursorCube(type, collection, item);
+    const cubeContainerInner = document.createElement('div');
+
+    cubeContainerInner.className = 'cube-container-inner-welcome';
+    cubeContainerInner.id = item.id;
+
+    cubeContainerInner.innerHTML = setInnerHtml(styles.display, styles.src, styles.backgroundColor, index, item);
 
     cubeContainerInner.querySelector('.try-button-welcome').addEventListener('click', async (event) => {
         await onClickTry(event, item, cubeContainerInner, index)
     })
 
-    if (type === "welcome" && display === "none"){
+    if (type === "welcome" && styles.display === "none"){
         cubeContainerInner.querySelector('.add-button-welcome').addEventListener('click', async (event) => {
             addCursor(item.id, cubeContainerInner)
             document.getElementById("button-get-more-welcome").style.display = "none";
             document.getElementById('go-to-collection-button').style.display = 'flex';
         },{once : true})
-    } else if (type === "user" && display === "none"){
+    } else if (type === "user" && styles.display === "none"){
         cubeContainerInner.querySelector('.add-button-welcome').addEventListener('click', bindingDataToClickListener.bind(null, item, cubeContainerInner),{once : true})
     }
-
 
     mainElement.appendChild(cubeContainerInner)
 }
@@ -493,6 +478,49 @@ function drawTopCursorsInWelcomePopUp(item, index, mainElement, type, collection
 function bindingDataToClickListener(item, element) {
     addCursor(item.id, element)
     drawUserCursors(item)
+}
+
+function onClickDelete(item, cursorUrl, cube, container) {
+    document.getElementById('delete-img').src = cursorUrl;
+    document.getElementById('button-no').addEventListener('click' , event => {
+        document.getElementById('delete-cursor').style.display = "none";
+    })
+    const buttonYes = document.getElementById('button-yes');
+    const clone = buttonYes.cloneNode(true);
+
+    clone.addEventListener('click' , () => {
+        chrome.runtime.sendMessage({type: "DELETE", cursorId: item.id}, async function (response) {
+            if (response === "ok") {
+                const topCubeArray = document.getElementsByClassName("cube-container-inner-welcome");
+                Array.from(topCubeArray).forEach((cube, index) => {
+                    if (cube.id === item.id.toString()) {
+                        cube.querySelector('.v').style.display = "none";
+                        cube.querySelector('.add-button-welcome').style.background = 'linear-gradient(269.42deg, #006EDD 0%, #004585 100%)';
+                        cube.querySelector('.image-add-welcome').src = '../asset/ADD.svg';
+                        const clone = cube.cloneNode(true);
+                        clone.querySelector('.add-button-welcome').addEventListener('click', bindingDataToClickListener.bind(null, item, clone), {once : true})
+                        clone.querySelector('.try-button-welcome').addEventListener('click', async (event) => {
+                            await onClickTry(event, item, clone, index)
+                        })
+                        clone.id = cube.id;
+                        cube.parentNode.replaceChild(clone, cube);
+                    }
+                })
+                const resizeView = document.getElementById("size-dot-container");
+                if (resizeView.style.display === "flex") {
+                    resizeView.style.display = "none";
+                    document.getElementById("size-dot-container-off").style.display = "flex";
+                }
+                chrome.storage.local.set({"default_url" : {"urlCursor" : "", "urlPointer" : ""}})
+                chrome.storage.local.set({"obj_cursor_url" : ""})
+                disableCursor()
+                container.removeChild(cube);
+            }
+        });
+        document.getElementById('delete-cursor').style.display = "none";
+    })
+    buttonYes.parentNode.replaceChild(clone,buttonYes)
+    document.getElementById('delete-cursor').style.display = "flex";
 }
 
 function drawUserCursors(item) {
@@ -523,53 +551,11 @@ function drawUserCursors(item) {
             sizeDotContainer.style.display = "flex";
         }
         disableTrying();
-        changeCursor(resizedUrl.urlCursor)
-        changePointer(resizedUrl.urlPointer)
+        changeCursor(resizedUrl.urlCursor, resizedUrl.urlPointer)
     })
 
-    cube.querySelector('#x-image').addEventListener('click', event => {
-        document.getElementById('delete-img').src = cursorUrl;
-        document.getElementById('button-no').addEventListener('click' , event => {
-            document.getElementById('delete-cursor').style.display = "none";
-        })
-        const buttonYes = document.getElementById('button-yes');
-        const clone = buttonYes.cloneNode(true);
-
-        clone.addEventListener('click' , () => {
-            chrome.runtime.sendMessage({type: "DELETE", cursorId: item.id}, async function (response) {
-                if (response === "ok") {
-                    const topCubeArray = document.getElementsByClassName("cube-container-inner-welcome");
-                    Array.from(topCubeArray).forEach((cube, index) => {
-                        if (cube.id === item.id.toString()) {
-                            cube.querySelector('.v').style.display = "none";
-                            cube.querySelector('.add-button-welcome').style.background = 'linear-gradient(269.42deg, #006EDD 0%, #004585 100%)';
-                            cube.querySelector('.image-add-welcome').src = '../asset/ADD.svg';
-                            const clone = cube.cloneNode(true);
-                            clone.querySelector('.add-button-welcome').addEventListener('click', bindingDataToClickListener.bind(null, item, clone), {once : true})
-                            clone.querySelector('.try-button-welcome').addEventListener('click', async (event) => {
-                                await onClickTry(event, item, clone, index)
-                            })
-                            clone.id = cube.id;
-                            cube.parentNode.replaceChild(clone, cube);
-                        }
-                    })
-                    const resizeView = document.getElementById("size-dot-container");
-                    if (resizeView.style.display === "flex") {
-                        resizeView.style.display = "none";
-                        document.getElementById("size-dot-container-off").style.display = "flex";
-                    }
-                    chrome.storage.local.set({"default_url" : {"urlCursor" : "", "urlPointer" : ""}})
-                    chrome.storage.local.set({"obj_cursor_url" : ""})
-                    disableCursor()
-                    disablePointer()
-                    container.removeChild(cube);
-                }
-            });
-            document.getElementById('delete-cursor').style.display = "none";
-        })
-        buttonYes.parentNode.replaceChild(clone,buttonYes)
-        document.getElementById('delete-cursor').style.display = "flex";
-
+    cube.querySelector('#x-image').addEventListener('click', () => {
+        onClickDelete(item, cursorUrl, cube, container);
     })
 
     container.appendChild(cube)
