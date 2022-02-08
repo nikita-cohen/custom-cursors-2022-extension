@@ -14,7 +14,6 @@ function getStyle(element, property) {
     return (getComputedStyle(element, null).getPropertyValue(property));
 }
 
-
 function changeCursor(urlCursor, urlPointer) {
     let styleSheet = document.createElement('style');
 
@@ -37,7 +36,6 @@ function disableCursor() {
     a, button, .pointer-hover {\n  cursor: pointer !important;\n        }\n `;
     document.head.appendChild(styleSheet);
 }
-
 
 document.body.addEventListener('mouseover', event => {
     let pointer = getStyle(event.target, 'cursor');
