@@ -470,6 +470,13 @@ body {
     z-index: 2;
     background: rgba(0, 0, 0, 0.8);
     display: none;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.click-able {
+    width: 20%;
+    height: 15%;
 }
 
 .switch input {display:none;}
@@ -924,6 +931,7 @@ input:checked + .slider .off
 }
 
 .cube:hover {
+    transform: scale(1.05);
     background: #8DC6FF;
 }
 

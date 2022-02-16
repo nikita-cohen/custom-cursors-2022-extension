@@ -57,7 +57,8 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
     }
 })
 
-chrome.storage.local.get("obj_cursor_url", function (result) {
-    console.log(result.obj_cursor_url)
+chrome.storage.local.get(["obj_cursor_url", "extension_play"], function (result) {
+    if (result.obj_cursor_url && result.extension_play === "on"){
         changeCursor(result.obj_cursor_url.urlCursor, result.obj_cursor_url.urlPointer)
+    }
 });
