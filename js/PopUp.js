@@ -125,7 +125,7 @@ function setOnClickListener() {
 
             if (topCursorContainerUserPopUp.childElementCount > 0 && topCursorContainerUserPopUp.style.display === "none") {
                 document.getElementById('collection-top-cursor-header').style.display = 'flex';
-                topCursorContainerUserPopUp.style.display = 'grid';
+                topCursorContainerUserPopUp.style.display = 'flex';
             }
             if (result.user_collection) {
                 result.user_collection.forEach((item) => {
@@ -207,7 +207,7 @@ function setOnClickListener() {
 
     });
 
-    document.getElementById('click-able').addEventListener('click', () => {
+    document.getElementById('extension-off').addEventListener('click', () => {
         chrome.storage.local.get(['extension_play', 'obj_cursor_url', 'default_url'], async function(result) {
             if (result.extension_play === 'on') {
                 chrome.storage.local.set({'extension_play': 'off'});
@@ -642,12 +642,21 @@ function onClickDelete(item, cursorUrl, cube, container) {
             }
         });
         chrome.storage.local.get(['user_collection', 'topCollection'], function(result) {
-            indexNumber++;
-            drawTopCursorsInWelcomePopUp(item, indexNumber, topCursorContainerUserPopUp, "user", result.user_collection)
-            if (topCursorContainerUserPopUp.childElementCount > 0 && topCursorContainerUserPopUp.style.display === "none") {
-                document.getElementById('collection-top-cursor-header').style.display = 'flex';
-                topCursorContainerUserPopUp.style.display = 'grid';
+            let isInTop = false;
+            result.topCollection.forEach(cursor => {
+                if (cursor.id === item.id) {
+                    isInTop = true;
+                }
+            })
+            if (isInTop){
+                indexNumber++;
+                drawTopCursorsInWelcomePopUp(item, indexNumber, topCursorContainerUserPopUp, "user", result.user_collection)
+                if (topCursorContainerUserPopUp.childElementCount > 0 && topCursorContainerUserPopUp.style.display === "none") {
+                    document.getElementById('collection-top-cursor-header').style.display = 'flex';
+                    topCursorContainerUserPopUp.style.display = 'flex';
+                }
             }
+
         });
         document.getElementById('delete-cursor').style.display = 'none';
     });
