@@ -677,10 +677,14 @@ function onClickDelete(item, cursorUrl, cube, container, resizedUrl) {
 function drawUserCursors(item) {
     const container = document.getElementById('cursor-container');
     const cube = document.createElement('div');
-    let resizedUrl = null;
+    let resizedUrl =  null;
     let cursorUrl = item.cursor_path ? item.cursor_path : item.cursor.newPath;
     let pointerUrl = item.pointer_path ? item.pointer_path : item.pointer.newPath;
     cube.className = 'cube';
+
+    getResizedUrl(cursorUrl, pointerUrl).then(data => {
+        resizedUrl = data;
+    });
 
     cube.innerHTML = `<img id="x-image" class="x-image" src="../asset/x-icon.svg" alt="x"/>
                             <img id="cursor-image" class="cursor-view" src="${cursorUrl}" alt="cursor"/>`;
@@ -695,7 +699,6 @@ function drawUserCursors(item) {
 
     cube.addEventListener('click', async(event) => {
         if (!event.target.closest(".x-image")){
-            resizedUrl = await getResizedUrl(cursorUrl, pointerUrl);
             const resizeView = sizeDotContainerOff;
             chrome.storage.local.set({'obj_cursor_url': resizedUrl});
             chrome.storage.local.set({'default_url': {'urlCursor': cursorUrl, 'urlPointer': pointerUrl}});
