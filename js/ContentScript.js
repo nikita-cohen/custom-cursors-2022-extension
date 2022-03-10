@@ -7,8 +7,30 @@ window.addEventListener("message", (event) => {
         chrome.runtime.sendMessage({type: "REFRESH_COLLECTION"}, function (response) {
 
         });
+    } else if (event.data.type && (event.data.type === "FROM_PAGE_CURSOR")){
+        chrome.storage.local.get(["obj_cursor_url", "turn_off"], function (result) {
+            if (result.turn_off === "off") {
+                window.postMessage({ type: "FROM_EXTENSION_CURSOR", url : {"urlCursor" : "", "urlPointer" : ""}}, "*");
+            } else {
+                window.postMessage({ type: "FROM_EXTENSION_CURSOR", url : result.obj_cursor_url}, "*");
+            }
+        });
     }
 }, false);
+
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    if (request.type === "sendUpdate"){
+        chrome.storage.local.get(["obj_cursor_url", "turn_off"], function (result) {
+            if (result.turn_off === "off") {
+                window.postMessage({ type: "FROM_EXTENSION_CURSOR", url : {"urlCursor" : "", "urlPointer" : ""}}, "*");
+            } else {
+                window.postMessage({ type: "FROM_EXTENSION_CURSOR", url : result.obj_cursor_url}, "*");
+            }
+
+        });
+    }
+})
 
 function getStyle(element, property) {
     return (getComputedStyle(element, null).getPropertyValue(property));

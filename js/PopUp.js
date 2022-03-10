@@ -192,6 +192,13 @@ function setOnClickListener() {
                 extensionOff.style.display = 'flex';
                 disableCursor();
                 chrome.storage.local.set({'turn_off': 'off'});
+                chrome.tabs.query({}, function(tabs) {
+                    tabs.forEach(tab => {
+                        if (tab.active){
+                            chrome.tabs.sendMessage(tab.id, {type : "sendUpdate"})
+                        }
+                    })
+                })
             }
             else if (result.extension_play === 'off') {
                 chrome.storage.local.set({
@@ -202,6 +209,13 @@ function setOnClickListener() {
                 changeCursor(result.obj_cursor_url.urlCursor, result.obj_cursor_url.urlPointer);
                 extensionOff.style.display = 'none';
                 chrome.storage.local.set({'turn_off': 'on'});
+                chrome.tabs.query({}, function(tabs) {
+                    tabs.forEach(tab => {
+                        if (tab.active){
+                            chrome.tabs.sendMessage(tab.id, {type : "sendUpdate"})
+                        }
+                    })
+                })
             }
         });
 
@@ -706,7 +720,17 @@ function drawUserCursors(item) {
                 resizeView.style.display = 'none';
                 sizeDotContainer.style.display = 'flex';
             }
+
+            chrome.tabs.query({}, function(tabs) {
+                tabs.forEach(tab => {
+                    if (tab.active){
+                        chrome.tabs.sendMessage(tab.id, {type : "sendUpdate"})
+                    }
+                })
+            })
+
             disableTrying();
+
             changeCursor(resizedUrl.urlCursor, resizedUrl.urlPointer);
         }
 
