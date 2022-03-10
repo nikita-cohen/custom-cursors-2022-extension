@@ -74,10 +74,13 @@ function updateUserCollection() {
 
 updateUserCollection();
 
-chrome.storage.local.get(['topCollection', 'cursor_size', 'extension_play', 'user_Id_custom_cursors'], function(result) {
+chrome.storage.local.get(['topCollection', 'cursor_size', 'extension_play', 'user_Id_custom_cursors', 'tryingUrl'], function(result) {
     if (!result.topCollection) getTopCursors().then(data => {
         chrome.storage.local.set({'topCollection': data.items});
     });
+    if (!result.tryingUrl) {
+        chrome.storage.local.set({"tryingUrl" : "off"})
+    }
     if (!result.cursor_size) {
         chrome.storage.local.set({'cursor_size': 'three'});
     }

@@ -304,11 +304,18 @@ function resizeDataURL(data, wantedWidth, wantedHeight, type) {
 }
 
 function resizeCurrentCursor() {
-    chrome.storage.local.get(['default_url'], async function(result) {
-        if (result.default_url) {
-            const urls = await getResizedUrl(result.default_url.urlCursor, result.default_url.urlPointer);
+    chrome.storage.local.get(['default_url', 'tryingUrl'], async function(result) {
+        if (result.tryingUrl !== "off") {
+            const urlsDefault = await getResizedUrl(result.default_url.urlCursor, result.default_url.urlPointer);
+            const urls = await getResizedUrl(result.tryingUrl.urlCursor, result.tryingUrl.urlPointer);
             changeCursor(urls.urlCursor, urls.urlPointer);
-            chrome.storage.local.set({'obj_cursor_url': urls});
+            chrome.storage.local.set({'obj_cursor_url': urlsDefault});
+        } else {
+            if (result.default_url) {
+                const urls = await getResizedUrl(result.default_url.urlCursor, result.default_url.urlPointer);
+                changeCursor(urls.urlCursor, urls.urlPointer);
+                chrome.storage.local.set({'obj_cursor_url': urls});
+            }
         }
     });
 }
@@ -454,6 +461,8 @@ async function onClickTry(event, item, element, index) {
         changeCursor(url.urlCursor, url.urlPointer);
         checkIfAnotherButtonTrying(index);
 
+        chrome.storage.local.set({"tryingUrl" : {urlCursor, urlPointer}})
+
         mainElement.setAttribute('trying', 'true');
     }
     else if (mainElement.getAttribute('trying') === 'true') {
@@ -466,6 +475,8 @@ async function onClickTry(event, item, element, index) {
                 changeCursor(result.obj_cursor_url.urlCursor, result.obj_cursor_url.urlPointer);
             }
         });
+
+        chrome.storage.local.set({"tryingUrl" : "off"})
 
     }
 }
@@ -642,18 +653,26 @@ function onClickDelete(item, cursorUrl, cube, container, resizedUrl) {
                         cube.parentNode.replaceChild(clone, cube);
                     }
                 });
-                const resizeView = document.getElementById('size-dot-container');
-                if (resizeView.style.display === 'flex') {
-                    resizeView.style.display = 'none';
-                    document.getElementById('size-dot-container-off').style.display = 'flex';
-                }
-                chrome.storage.local.get("obj_cursor_url", function(result) {
-                    if (result.obj_cursor_url) {
+
+
+                chrome.storage.local.get(["default_url", 'obj_cursor_url'], function(result) {
+                    const resizeView = document.getElementById('size-dot-container');
+                    if (result.default_url.urlCursor === "" && result.default_url.urlPointer === "" ) {
+                        if (resizeView.style.display === 'flex' ) {
+                            resizeView.style.display = 'none';
+                            document.getElementById('size-dot-container-off').style.display = 'flex';
+                        }
+                    }
+
+                    if (result.default_url) {
                         if (resizedUrl) {
-                            if (result.obj_cursor_url.urlCursor === resizedUrl.urlCursor) {
-                                console.log("holl")
+                            if (result.default_url.urlCursor === resizedUrl) {
                                 chrome.storage.local.set({'obj_cursor_url': {'urlCursor': "", 'urlPointer': ""}});
                                 chrome.storage.local.set({'default_url': {'urlCursor': "", 'urlPointer': ""}});
+                                if (resizeView.style.display === 'flex' ) {
+                                    resizeView.style.display = 'none';
+                                    document.getElementById('size-dot-container-off').style.display = 'flex';
+                                }
                                 disableCursor();
                             }
                         }
@@ -691,14 +710,11 @@ function onClickDelete(item, cursorUrl, cube, container, resizedUrl) {
 function drawUserCursors(item) {
     const container = document.getElementById('cursor-container');
     const cube = document.createElement('div');
-    let resizedUrl =  null;
+
     let cursorUrl = item.cursor_path ? item.cursor_path : item.cursor.newPath;
     let pointerUrl = item.pointer_path ? item.pointer_path : item.pointer.newPath;
     cube.className = 'cube';
 
-    getResizedUrl(cursorUrl, pointerUrl).then(data => {
-        resizedUrl = data;
-    });
 
     cube.innerHTML = `<img id="x-image" class="x-image" src="../asset/x-icon.svg" alt="x"/>
                             <img id="cursor-image" class="cursor-view" src="${cursorUrl}" alt="cursor"/>`;
@@ -713,6 +729,7 @@ function drawUserCursors(item) {
 
     cube.addEventListener('click', async(event) => {
         if (!event.target.closest(".x-image")){
+            let resizedUrl = await getResizedUrl(cursorUrl, pointerUrl);
             const resizeView = sizeDotContainerOff;
             chrome.storage.local.set({'obj_cursor_url': resizedUrl});
             chrome.storage.local.set({'default_url': {'urlCursor': cursorUrl, 'urlPointer': pointerUrl}});
@@ -730,14 +747,14 @@ function drawUserCursors(item) {
             })
 
             disableTrying();
-
+            chrome.storage.local.set({"tryingUrl" : "off"})
             changeCursor(resizedUrl.urlCursor, resizedUrl.urlPointer);
         }
 
     });
 
     cube.querySelector('#x-image').addEventListener('click', () => {
-        onClickDelete(item, cursorUrl, cube, container, resizedUrl);
+        onClickDelete(item, cursorUrl, cube, container, cursorUrl);
     });
 
     container.insertAdjacentElement('afterbegin', cube);
