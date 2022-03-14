@@ -11,6 +11,7 @@ const sizeDotContainerOff = document.getElementById('size-dot-container-off');
 const sizeDotContainer = document.getElementById('size-dot-container');
 let indexNumber = 28;
 let userCollection = [];
+chrome.storage.local.set({"tryingUrl" : "off"})
 
 chrome.storage.local.get(['cursor_size', 'topCollection', 'user_collection', 'extension_play', 'isExtensionWorking', 'obj_cursor_url'], function(result) {
     userCollection = result.user_collection;
@@ -142,10 +143,16 @@ function setOnClickListener() {
     });
 
     document.getElementById('resize-button').addEventListener('click', () => {
-        chrome.storage.local.get('obj_cursor_url', function(result) {
-            if (!result.obj_cursor_url || result.obj_cursor_url === '') {
-                buttonsUserCollectionPopUp.style.display = 'none';
-                sizeDotContainerOff.style.display = 'flex';
+        chrome.storage.local.get(['obj_cursor_url', "tryingUrl"], function(result) {
+            console.log(result.tryingUrl)
+            if (!result.obj_cursor_url || result.obj_cursor_url === '' || result.obj_cursor_url.urlCursor === "" ||  result.obj_cursor_url.urlPointer === "" ) {
+                if (result.tryingUrl === "off") {
+                    buttonsUserCollectionPopUp.style.display = 'none';
+                    sizeDotContainerOff.style.display = 'flex';
+                } else {
+                    buttonsUserCollectionPopUp.style.display = 'none';
+                    sizeDotContainer.style.display = 'flex';
+                }
             }
             else {
                 buttonsUserCollectionPopUp.style.display = 'none';
@@ -192,6 +199,7 @@ function setOnClickListener() {
                 extensionOff.style.display = 'flex';
                 disableCursor();
                 chrome.storage.local.set({'turn_off': 'off'});
+                chrome.storage.local.set({"tryingUrl" : "off"})
                 chrome.tabs.query({}, function(tabs) {
                     tabs.forEach(tab => {
                         if (tab.active){
@@ -228,6 +236,7 @@ function setOnClickListener() {
                 extensionOff.style.display = 'flex';
                 disableCursor();
                 chrome.storage.local.set({'turn_off': 'off'});
+                chrome.storage.local.set({"tryingUrl" : "off"})
             }
             else if (result.extension_play === 'off') {
                 chrome.storage.local.set({
@@ -306,10 +315,12 @@ function resizeDataURL(data, wantedWidth, wantedHeight, type) {
 function resizeCurrentCursor() {
     chrome.storage.local.get(['default_url', 'tryingUrl'], async function(result) {
         if (result.tryingUrl !== "off") {
-            const urlsDefault = await getResizedUrl(result.default_url.urlCursor, result.default_url.urlPointer);
+            if (result.default_url.urlCursor) {
+                const urlsDefault = await getResizedUrl(result.default_url.urlCursor, result.default_url.urlPointer);
+                chrome.storage.local.set({'obj_cursor_url': urlsDefault});
+            }
             const urls = await getResizedUrl(result.tryingUrl.urlCursor, result.tryingUrl.urlPointer);
             changeCursor(urls.urlCursor, urls.urlPointer);
-            chrome.storage.local.set({'obj_cursor_url': urlsDefault});
         } else {
             if (result.default_url) {
                 const urls = await getResizedUrl(result.default_url.urlCursor, result.default_url.urlPointer);
@@ -450,6 +461,8 @@ function checkIfAnotherButtonTrying(index) {
 
 async function onClickTry(event, item, element, index) {
     const mainElement = element.querySelector('.try-button-welcome');
+    const sizeOn = document.getElementById('size-dot-container');
+    const sizeOff = document.getElementById('size-dot-container-off');
     if (mainElement.getAttribute('trying') === 'false') {
         const urlCursor = item.cursor_path ? item.cursor_path : item.cursor.newPath;
         const urlPointer = item.pointer_path ? item.pointer_path : item.pointer.newPath;
@@ -463,6 +476,11 @@ async function onClickTry(event, item, element, index) {
 
         chrome.storage.local.set({"tryingUrl" : {urlCursor, urlPointer}})
 
+        if (sizeOff.style.display === "flex") {
+            sizeOff.style.display = "none";
+            sizeOn.style.display = "flex";
+        }
+
         mainElement.setAttribute('trying', 'true');
     }
     else if (mainElement.getAttribute('trying') === 'true') {
@@ -475,6 +493,11 @@ async function onClickTry(event, item, element, index) {
                 changeCursor(result.obj_cursor_url.urlCursor, result.obj_cursor_url.urlPointer);
             }
         });
+
+        if (sizeOn.style.display === "flex") {
+            sizeOn.style.display = "none";
+            sizeOff.style.display = "flex";
+        }
 
         chrome.storage.local.set({"tryingUrl" : "off"})
 
@@ -608,6 +631,8 @@ function checkIfThereCursorInUserCollection() {
             userCollectionPopUp.style.display = 'none';
             welcomePopUp.style.display = 'flex';
 
+            chrome.storage.local.set({"tryingUrl" : "off"})
+
             while (containerCursor.firstChild) {
                 containerCursor.removeChild(containerCursor.lastChild);
             }
@@ -620,6 +645,7 @@ function checkIfThereCursorInUserCollection() {
                 });
             });
 
+            disableCursor();
             document.getElementById('go-to-collection-button').style.display = 'none';
             document.getElementById('button-get-more-welcome').style.display = 'flex';
         }
