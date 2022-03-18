@@ -1,0 +1,19 @@
+{
+  "appName": {
+    "message": "Cute Custom Cursors 2021 for Chrome",
+    "description": "Cute Cursors" // extension page
+  },
+
+  "shortName": {
+    "message": "Cute Custom Cursors 2021",
+    "description": "Cute Custom Cursors 2021" // extension page
+  },
+
+  "appDesc": {
+    "message": "Take a cute custom cursors for Chrome. The mouse becomes a cute mouse.", // extension page
+    "description":"Take a cute custom cursors for Chrome. The mouse becomes a cute mouse."
+  },
+
+  "defTitle": { "message":"Click for options"}
+
+}

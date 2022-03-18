@@ -1,0 +1,20 @@
+{
+  "appName": {
+    "message": "Веселые Курсоры для Девушек в Хром",
+    "description": "Веселые Курсоры для Девушек" // extension page
+  },
+
+  "shortName": {
+    "message": "Милые Курсоры 2021",
+    "description": "Милые Курсоры 2021" // extension page
+  },
+
+  "appDesc": {
+    "message": "Заменяет курсор мыши на кое-что милое. Разноообразный выбор",
+    "description":"Заменяет обычный курсор мыши на кое-что милое!" // extension page
+  },
+
+  "defTitle": {
+  		"message":"Жми сюда для настроек"
+	}
+}

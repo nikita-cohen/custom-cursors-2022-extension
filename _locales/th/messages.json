@@ -1,0 +1,19 @@
+{
+  "appName": {
+    "message": "Custom cursor for Chrome",
+    "description": "Cute Cursors" // extension page
+  },
+
+  "shortName": {
+    "message": "Cute Custom Cursors 2021",
+    "description": "Cute Custom Cursors 2021" // extension page
+  },
+
+  "appDesc": {
+    "message": "แทนที่เคอร์เซอร์เริ่มต้นด้วยบางสิ่งที่น่ารัก เปลี่ยนเมาส์ปกติเป็นเคอร์เซอร์ที่กำหนดเองที่น่าทึ่ง", // extension page
+    "description":"แทนที่เคอร์เซอร์เริ่มต้นด้วยบางสิ่งที่น่ารัก เปลี่ยนเมาส์ปกติเป็นเคอร์เซอร์ที่กำหนดเองที่น่าทึ่ง"
+  },
+
+  "defTitle": { "message":"Click for options"}
+
+}
