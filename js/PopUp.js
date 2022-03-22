@@ -203,7 +203,9 @@ function setOnClickListener() {
                 chrome.tabs.query({}, function(tabs) {
                     tabs.forEach(tab => {
                         if (tab.active){
-                            chrome.tabs.sendMessage(tab.id, {type : "sendUpdate"})
+                            chrome.tabs.sendMessage(tab.id, {type : "sendUpdate"}, (response) => {
+
+                            })
                         }
                     })
                 })
@@ -220,7 +222,9 @@ function setOnClickListener() {
                 chrome.tabs.query({}, function(tabs) {
                     tabs.forEach(tab => {
                         if (tab.active){
-                            chrome.tabs.sendMessage(tab.id, {type : "sendUpdate"})
+                            chrome.tabs.sendMessage(tab.id, {type : "sendUpdate"}, (response) => {
+
+                            })
                         }
                     })
                 })
@@ -767,7 +771,9 @@ function drawUserCursors(item) {
             chrome.tabs.query({}, function(tabs) {
                 tabs.forEach(tab => {
                     if (tab.active){
-                        chrome.tabs.sendMessage(tab.id, {type : "sendUpdate"})
+                        chrome.tabs.sendMessage(tab.id, {type : "sendUpdate"}, (response) => {
+
+                        })
                     }
                 })
             })

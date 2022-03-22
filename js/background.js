@@ -125,7 +125,10 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         }
         else sendResponse('error');
     });
-    else if (request.type === 'REFRESH_COLLECTION') updateUserCollection();
+    else if (request.type === 'REFRESH_COLLECTION'){
+        updateUserCollection();
+        sendResponse("");
+    }
     else if (request.type === 'DELETE') chrome.storage.local.get('user_Id_custom_cursors', async function(result) {
         const response = await deleteCursor(result.user_Id_custom_cursors, request.cursorId);
 
@@ -141,7 +144,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
 chrome.tabs.query({}, function(tabs) {
     tabs.forEach(tb => {
-        const isMatch = !(tb.url.match("https://chrome.google.com") || !tb.url.startsWith('http://') || !tb.url.startsWith('https://'))
+        const isMatch = !(tb.url.match("https://chrome.google.com") || tb.url.match('chrome://')|| tb.url.match("chrome-error://chromewebdata/") || tb.url.match("error://chromewebdata/") || tb.url.match("view-source:") || tb.url.match("file:///") || !tb.url.match("http://") && !tb.url.match("https://"))
         if (isMatch) {
             chrome.scripting.executeScript({target: {tabId: tb.id, allFrames: false}, files: ['js/ContentScript.js']});
         }

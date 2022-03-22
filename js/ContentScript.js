@@ -24,9 +24,12 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         chrome.storage.local.get(["obj_cursor_url", "turn_off"], function (result) {
             if (result.turn_off === "off") {
                 window.postMessage({ type: "FROM_EXTENSION_CURSOR", url : {"urlCursor" : "", "urlPointer" : ""}}, "*");
+                sendResponse("")
             } else {
                 window.postMessage({ type: "FROM_EXTENSION_CURSOR", url : result.obj_cursor_url}, "*");
+                sendResponse("")
             }
+            sendResponse("")
 
         });
     }
